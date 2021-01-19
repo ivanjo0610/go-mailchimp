@@ -1,6 +1,7 @@
 package mailchimp
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +11,8 @@ import (
 
 // Unsubscribe ...
 func (c *Client) UnSubscribe(listID string, email string, mergeFields map[string]interface{}) (*MemberResponse, error) {
+	// Hash email
+	emailMD5 := fmt.Sprintf("%x", md5.Sum([]byte(email)))
 	// Make request
 	params := map[string]interface{}{
 		"email_address": email,
@@ -18,7 +21,7 @@ func (c *Client) UnSubscribe(listID string, email string, mergeFields map[string
 	}
 	resp, err := c.do(
 		"PUT",
-		fmt.Sprintf("/lists/%s/members/", listID),
+		fmt.Sprintf("/lists/%s/members/%s", listID, emailMD5),
 		&params,
 	)
 	if err != nil {
